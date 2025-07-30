@@ -28,7 +28,8 @@ function love.load()
     posx = (Resl[1] * 0.5) - (sqs * 0.5)
     posy = (Resl[2] * 0.5) - (sqs * 0.5)
     keyy = "."
-    Map[clamp(math.floor(love.math.random() * mapSize))][clamp(math.floor(love.math.random() * mapSize))] = 2
+    applePos = {math.floor(clamp(love.math.random() * mapSize)), clamp(math.floor(love.math.random() * mapSize))}
+    Map[applePos[1]][applePos[2]] = 2
 end
 
 function love.draw()
@@ -56,6 +57,10 @@ end
 function love.update(dt)
     time = time + dt
     if time >= speed then
+        if Map[applePos[1]][applePos[2]] ~= 2 then
+            applePos = {math.floor(clamp(love.math.random() * mapSize)), clamp(math.floor(love.math.random() * mapSize))}
+            Map[applePos[1]][applePos[2]] = 2
+        end
         time = 0
         local lastposx
         local lastposy
@@ -80,8 +85,15 @@ function love.update(dt)
             if Map[s[2]][s[3]] == 2 then
                 dtx = snake[#snake][2] - snake[#snake - 1][2]
                 dty = snake[#snake][3] - snake[#snake - 1][3]
-                table.insert(snake, {4, snake[#snake][2] + dtx, snake[#snake][3] + dty})
-                Map[math.floor(clamp(love.math.random() * mapSize))][clamp(math.floor(love.math.random() * mapSize))] = 2
+                dtx = snake[#snake][2] + dtx
+                dty = snake[#snake][3] + dty
+                if (dtx < 1) then dtx = mapSize end
+                if (dtx > mapSize) then dtx = 1 end
+                if (dty < 1) then dty = mapSize end
+                if (dty > mapSize) then dty = 1 end
+                table.insert(snake, {4, dtx, dty})
+                applePos = {math.floor(clamp(love.math.random() * mapSize)), clamp(math.floor(love.math.random() * mapSize))}
+                Map[applePos[1]][applePos[2]] = 2
                 Map[math.floor(clamp(love.math.random() * mapSize))][clamp(math.floor(love.math.random() * mapSize))] = 1
             elseif (Map[s[2]][s[3]] == 4 or Map[s[2]][s[3]] == 1) and s[1] == 3 then
                 os.exit(1)
