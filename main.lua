@@ -1,5 +1,5 @@
 local function clamp(n)
-    return math.max(1, math.min(16, n))
+    return math.max(1, math.min(mapSize, n))
 end
 
 function love.load()
