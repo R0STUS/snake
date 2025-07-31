@@ -2,6 +2,17 @@ local function clamp(n)
     return math.max(1, math.min(mapSize, n))
 end
 
+function remap()
+    for xx = 1, mapSize do
+        if Map[xx] == nil then
+            Map[xx] = {}
+            for yy = 1, mapSize do
+                Map[xx][yy] = 0
+            end
+        end
+    end
+end
+
 function love.load()
     Resl = {love.graphics.getWidth(), love.graphics.getHeight()}
     if Resl[1] < Resl[2] then
@@ -11,14 +22,9 @@ function love.load()
     end
     Map = {}
     mapSize = 16
-    for xx = 1, mapSize do
-        Map[xx] = {}
-        for yy = 1, mapSize do
-            Map[xx][yy] = 0
-        end
-    end
+    remap()
     time = 0
-    speed = 0.15
+    speed = 0.25
     dir = {1, 0}
     snake = {
         {3, 3, 1},
@@ -27,9 +33,9 @@ function love.load()
     }
     posx = (Resl[1] * 0.5) - (sqs * 0.5)
     posy = (Resl[2] * 0.5) - (sqs * 0.5)
-    keyy = "."
     applePos = {math.floor(clamp(love.math.random() * mapSize)), clamp(math.floor(love.math.random() * mapSize))}
     Map[applePos[1]][applePos[2]] = 2
+    keyy = 0
 end
 
 function love.draw()
@@ -62,6 +68,7 @@ function love.update(dt)
             Map[applePos[1]][applePos[2]] = 2
         end
         time = 0
+        keyy = 0
         local lastposx
         local lastposy
         for i, s in ipairs(snake) do
@@ -92,6 +99,9 @@ function love.update(dt)
                 if (dty < 1) then dty = mapSize end
                 if (dty > mapSize) then dty = 1 end
                 table.insert(snake, {4, dtx, dty})
+                speed = speed * 0.95
+                mapSize = mapSize + 1
+                remap()
                 applePos = {math.floor(clamp(love.math.random() * mapSize)), clamp(math.floor(love.math.random() * mapSize))}
                 Map[applePos[1]][applePos[2]] = 2
                 Map[math.floor(clamp(love.math.random() * mapSize))][clamp(math.floor(love.math.random() * mapSize))] = 1
@@ -120,21 +130,27 @@ function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then
         os.exit(0)
     end
-    if key == "up" then
-        if dir[2] ~= 1 then
-            dir = {0, -1}
-        end
-    elseif key == "down" then
-        if dir[2] ~= -1 then
-            dir = {0, 1}
-        end
-    elseif key == "right" then
-        if dir[1] ~= -1 then
-            dir = {1, 0}
-        end
-    elseif key == "left" then
-        if dir[1] ~= 1 then
-            dir = {-1, 0}
+    if keyy == 0 then
+        if key == "up" then
+            if dir[2] ~= 1 then
+                dir = {0, -1}
+                keyy = 1
+            end
+        elseif key == "down" then
+            if dir[2] ~= -1 then
+                dir = {0, 1}
+                keyy = 1
+            end
+        elseif key == "right" then
+            if dir[1] ~= -1 then
+                dir = {1, 0}
+                keyy = 1
+            end
+        elseif key == "left" then
+            if dir[1] ~= 1 then
+                dir = {-1, 0}
+                keyy = 1
+            end
         end
     end
 end
